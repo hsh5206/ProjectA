@@ -27,6 +27,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	float GroundSpeed;
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
+	float Direction;
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bIsInAir;
 	UPROPERTY(BlueprintReadOnly, Category = "Character State")
 	ECharacterState CharacterState;

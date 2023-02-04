@@ -34,17 +34,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeArmDsiarm();
 
-	
+	/** Sensing */
+	UPROPERTY(EditAnywhere, Category = "Sensing")
+	class USphereComponent* LockOnSphere;
+
 
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Camera)
 	class USpringArmComponent* SpringArm;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
 
-	/** Input Actions */
+	/** Callbacks by Input */
 	void MoveForward(float value);
 	void MoveRight(float value);
 	void LookUp(float value);
@@ -52,15 +55,25 @@ protected:
 	void WalkRun();
 	void ArmDisarm();
 	void EPress();
+	void LockOn();
+	void UnLockOn();
+
+	/** LockOn Sphere */
+	UFUNCTION()
+	virtual void OnLockOnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	virtual void OnLockOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
 	UPROPERTY(VisibleAnywhere)
 	class AItem* OverlappedItem;
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	class AWeapon* Weapon;
-
-	
-
+	UPROPERTY(VisibleAnywhere)
+	class APawn* LockedOnEnemy;
+	/** temp */
+	UPROPERTY(VisibleAnywhere)
+	class APawn* CanLockedOnEnemy;
 public:
 	FORCEINLINE void SetOverlappedItem(AItem* item) { OverlappedItem = item; }
 };

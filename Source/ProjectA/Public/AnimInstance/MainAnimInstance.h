@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Characters/Main/MainCharacterState.h"
 #include "MainAnimInstance.generated.h"
 
 /**
@@ -27,4 +28,6 @@ public:
 	float GroundSpeed;
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bIsInAir;
+	UPROPERTY(BlueprintReadOnly, Category = "Character State")
+	ECharacterState CharacterState;
 };

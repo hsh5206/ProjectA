@@ -22,11 +22,16 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	/** State */
+	UPROPERTY(VisibleAnywhere)
+	bool bWalk = false;
+
 	/** Input Actions */
 	void MoveForward(float value);
 	void MoveRight(float value);
 	void LookUp(float value);
 	void Turn(float value);
+	void WalkRun();
 
 private:
 	UPROPERTY(EditAnywhere)

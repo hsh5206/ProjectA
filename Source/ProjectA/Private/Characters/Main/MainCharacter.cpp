@@ -23,6 +23,9 @@ AMainCharacter::AMainCharacter()
 	SpringArm->bUsePawnControlRotation = true;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
+
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->JumpZVelocity = 600.f;
 }
 
 void AMainCharacter::BeginPlay()
@@ -41,6 +44,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AMainCharacter::Turn);
 
 	PlayerInputComponent->BindAction(FName("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction(FName("WalkRun"), EInputEvent::IE_Pressed, this, &AMainCharacter::WalkRun);
+	PlayerInputComponent->BindAction(FName("WalkRun"), EInputEvent::IE_Released, this, &AMainCharacter::WalkRun);
 }
 
 void AMainCharacter::MoveForward(float value)
@@ -78,6 +83,20 @@ void AMainCharacter::Turn(float value)
 	if (Controller && (value != 0.f))
 	{
 		AddControllerYawInput(value);
+	}
+}
+
+void AMainCharacter::WalkRun()
+{
+	if (bWalk)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+		bWalk = false;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		bWalk = true;
 	}
 }
 

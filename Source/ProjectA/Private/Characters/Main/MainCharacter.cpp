@@ -34,25 +34,8 @@ AMainCharacter::AMainCharacter()
 
 	LockOnSphere = CreateDefaultSubobject<USphereComponent>(TEXT("LockOnSphere"));
 	LockOnSphere->SetupAttachment(GetRootComponent());
-}
 
-void AMainCharacter::ChangeArmDsiarm()
-{
-	if (MainState == ECharacterState::EAS_Armed)
-	{
-		Weapon->AttachMeshToSocket(GetMesh(), FName("SwordHolderSocket"));
-		MainState = ECharacterState::EAS_Unarmed;
-	}
-	else if (MainState == ECharacterState::EAS_Unarmed)
-	{
-		Weapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
-		MainState = ECharacterState::EAS_Armed;
-	}
-	else if (MainState == ECharacterState::EAS_UnarmedToLockOn)
-	{
-		Weapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
-		MainState = ECharacterState::EAS_LockOn;
-	}
+	AttackEndComboState();
 }
 
 void AMainCharacter::BeginPlay()
@@ -67,7 +50,7 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (MainState == ECharacterState::EAS_LockOn)
+	if (MainState == ECharacterArmedState::EAS_LockOn)
 	{
 		const FRotator Direction = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockedOnEnemy->GetActorLocation());
 		SetActorRotation(FRotator(GetActorRotation().Pitch, Direction.Yaw, GetActorRotation().Roll));
@@ -90,6 +73,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction(FName("ArmDisarm"), EInputEvent::IE_Pressed, this, &AMainCharacter::ArmDisarm);
 	PlayerInputComponent->BindAction(FName("EPress"), EInputEvent::IE_Pressed, this, &AMainCharacter::EPress);
 	PlayerInputComponent->BindAction(FName("LockOn"), EInputEvent::IE_Pressed, this, &AMainCharacter::LockOn);
+	PlayerInputComponent->BindAction(FName("Attack"), EInputEvent::IE_Pressed, this, &AMainCharacter::Attack);
+
 }
 
 void AMainCharacter::MoveForward(float value)
@@ -147,7 +132,7 @@ void AMainCharacter::WalkRun()
 void AMainCharacter::ArmDisarm()
 {
 	if (!Weapon) return;
-	if (MainState == ECharacterState::EAS_Armed)
+	if (MainState == ECharacterArmedState::EAS_Armed)
 	{
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && EquipMontage)
@@ -156,7 +141,7 @@ void AMainCharacter::ArmDisarm()
 			AnimInstance->Montage_JumpToSection(FName("CombatToIdle"), EquipMontage);
 		}
 	}
-	else if (MainState == ECharacterState::EAS_Unarmed)
+	else if (MainState == ECharacterArmedState::EAS_Unarmed)
 	{
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && EquipMontage)
@@ -164,6 +149,25 @@ void AMainCharacter::ArmDisarm()
 			AnimInstance->Montage_Play(EquipMontage);
 			AnimInstance->Montage_JumpToSection(FName("IdleToCombat"), EquipMontage);
 		}
+	}
+}
+
+void AMainCharacter::ChangeArmDsiarm()
+{
+	if (MainState == ECharacterArmedState::EAS_Armed)
+	{
+		Weapon->AttachMeshToSocket(GetMesh(), FName("SwordHolderSocket"));
+		MainState = ECharacterArmedState::EAS_Unarmed;
+	}
+	else if (MainState == ECharacterArmedState::EAS_Unarmed)
+	{
+		Weapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
+		MainState = ECharacterArmedState::EAS_Armed;
+	}
+	else if (MainState == ECharacterArmedState::EAS_UnarmedToLockOn)
+	{
+		Weapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
+		MainState = ECharacterArmedState::EAS_LockOn;
 	}
 }
 
@@ -181,9 +185,9 @@ void AMainCharacter::EPress()
 void AMainCharacter::LockOn()
 {
 	if (!CanLockedOnEnemy) return;
-	if (MainState == ECharacterState::EAS_Unarmed)
+	if (MainState == ECharacterArmedState::EAS_Unarmed)
 	{
-		MainState = ECharacterState::EAS_UnarmedToLockOn;
+		MainState = ECharacterArmedState::EAS_UnarmedToLockOn;
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && EquipMontage)
 		{
@@ -193,15 +197,38 @@ void AMainCharacter::LockOn()
 	}
 	else
 	{
-		MainState = ECharacterState::EAS_LockOn;
+		MainState = ECharacterArmedState::EAS_LockOn;
 	}
 	LockedOnEnemy = CanLockedOnEnemy;
 }
 
 void AMainCharacter::UnLockOn()
 {
-	MainState = ECharacterState::EAS_Armed;
+	MainState = ECharacterArmedState::EAS_Armed;
 	LockedOnEnemy = nullptr;
+}
+
+void AMainCharacter::Attack()
+{
+	if (CombatState == ECharacterCombatState::EAS_Attacking && !CanNextCombo) return;
+	if (FMath::IsWithinInclusive<int32>(CurrentCombo, 0, MaxCombo - 1))
+	{
+		CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
+	}
+	CanNextCombo = false;
+	PlayAttackMontage(FName(*FString::Printf(TEXT("Attack%d"), CurrentCombo)));
+}
+
+void AMainCharacter::PlayAttackMontage(FName SectionName)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && AttackMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Animnotify_PlayAttackMontage Func %s"), *SectionName.ToString());
+		AnimInstance->Montage_Play(AttackMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+		CombatState = ECharacterCombatState::EAS_Attacking;
+	}
 }
 
 void AMainCharacter::OnLockOnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -220,5 +247,17 @@ void AMainCharacter::OnLockOnOverlapEnd(UPrimitiveComponent* OverlappedComponent
 	{
 		CanLockedOnEnemy = nullptr;
 	}
-	if (MainState == ECharacterState::EAS_LockOn) UnLockOn();
+	if (MainState == ECharacterArmedState::EAS_LockOn) UnLockOn();
+}
+
+void AMainCharacter::AttackStartComboState()
+{
+	CanNextCombo = true;
+}
+
+void AMainCharacter::AttackEndComboState()
+{
+	CombatState = ECharacterCombatState::ECS_Default;
+	CanNextCombo = false;
+	CurrentCombo = 0;
 }

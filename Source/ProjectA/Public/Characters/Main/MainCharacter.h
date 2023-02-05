@@ -24,15 +24,24 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	bool bWalk = false;
 	UPROPERTY(VisibleAnywhere)
-	ECharacterState MainState = ECharacterState::EAS_Unarmed;
+	ECharacterArmedState MainState = ECharacterArmedState::EAS_Unarmed;
+	UPROPERTY(VisibleAnywhere)
+	ECharacterCombatState CombatState = ECharacterCombatState::ECS_Default;
 
 	/** Montage */
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* EquipMontage;
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* AttackMontage;
+	void PlayAttackMontage(FName SectionName);
 
 	/** Callbacks by AnimNotify */
 	UFUNCTION(BlueprintCallable)
 	void ChangeArmDsiarm();
+	UFUNCTION(BlueprintCallable)
+	void AttackStartComboState();
+	UFUNCTION(BlueprintCallable)
+	void AttackEndComboState();
 
 	/** Sensing */
 	UPROPERTY(EditAnywhere, Category = "Sensing")
@@ -57,6 +66,7 @@ protected:
 	void EPress();
 	void LockOn();
 	void UnLockOn();
+	void Attack();
 
 	/** LockOn Sphere */
 	UFUNCTION()
@@ -71,6 +81,15 @@ private:
 	class AWeapon* Weapon;
 	UPROPERTY(VisibleAnywhere)
 	class APawn* LockedOnEnemy;
+
+	/** Combo Attack */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = "true"))
+	bool CanNextCombo;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = "true"))
+	int32 MaxCombo = 4;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = "true"))
+	int32 CurrentCombo;
+	
 	/** temp */
 	UPROPERTY(VisibleAnywhere)
 	class APawn* CanLockedOnEnemy;

@@ -85,8 +85,6 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere)
 	class AItem* OverlappedItem;
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
-	class AWeapon* Weapon;
 	UPROPERTY(VisibleAnywhere)
 	class APawn* LockedOnEnemy;
 

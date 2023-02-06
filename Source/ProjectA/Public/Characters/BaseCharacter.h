@@ -15,11 +15,21 @@ public:
 	ABaseCharacter();
 	virtual void Tick(float DeltaTime) override;
 
-
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+	class AWeapon* Weapon;
 
+	float MaxHealth;
+	float Health;
+	float MaxStamina;
+	float Stamina;
 
+	/** Stat */
+	float Vigor = 5; // »ý¸í·Â
+	float Endurance = 5; // Áö±¸·Â
+	float Power = 5; // Èû
+	float Agility = 5; // ¹ÎÃ¸
+	float Durability = 5; // ³»±¸
 };

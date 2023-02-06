@@ -14,4 +14,6 @@ class PROJECTA_API AEnemy : public ABaseCharacter
 {
 	GENERATED_BODY()
 	
+public:
+	AEnemy();
 };

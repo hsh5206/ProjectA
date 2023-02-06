@@ -3,26 +3,22 @@
 
 #include "AnimInstance/MainAnimInstance.h"
 #include "Characters/Main/MainCharacter.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 
 void UMainAnimInstance::NativeInitializeAnimation()
 {
-	MainCharacter = Cast<AMainCharacter>(TryGetPawnOwner());
-	if (MainCharacter)
+	Super::NativeInitializeAnimation();
+	if (Character)
 	{
-		MainMovement = MainCharacter->GetCharacterMovement();
+		MainCharacter = Cast<AMainCharacter>(Character);
 	}
 }
 
 void UMainAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
-	if (MainMovement)
+	Super::NativeUpdateAnimation(DeltaSeconds);
+	if (Movement)
 	{
-		GroundSpeed = UKismetMathLibrary::VSizeXY(MainMovement->Velocity);
-		bIsInAir = MainMovement->IsFalling();
 		CharacterState = MainCharacter->MainState;
 		CombatState = MainCharacter->CombatState;
-		Direction = CalculateDirection(MainCharacter->GetVelocity(), MainCharacter->GetActorRotation());
 	}
 }

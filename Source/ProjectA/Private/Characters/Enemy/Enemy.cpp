@@ -3,3 +3,7 @@
 
 #include "Characters/Enemy/Enemy.h"
 
+AEnemy::AEnemy()
+{
+
+}

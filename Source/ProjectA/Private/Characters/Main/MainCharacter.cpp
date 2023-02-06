@@ -15,12 +15,14 @@ AMainCharacter::AMainCharacter()
 {
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
-	SpringArm->TargetArmLength = 250.f;
+	SpringArm->TargetArmLength = 270.f;
 	SpringArm->SetRelativeLocation(FVector(0.f, 0.f, 70.f));
+	SpringArm->bEnableCameraLag = true;
+	SpringArm->bEnableCameraRotationLag = true;
+	SpringArm->CameraLagSpeed = 6.f;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
-	Camera->SetRelativeLocation(FVector(0.f, 65.f, 0.f));
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -52,9 +54,10 @@ void AMainCharacter::Tick(float DeltaTime)
 
 	if (MainState == ECharacterArmedState::EAS_LockOn)
 	{
+		const FRotator CharacterRotation = GetActorRotation();
 		const FRotator Direction = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockedOnEnemy->GetActorLocation());
-		SetActorRotation(FRotator(Direction.Pitch, Direction.Yaw, GetActorRotation().Roll));
-		GetController()->SetControlRotation(FRotator(GetActorRotation().Pitch, Direction.Yaw, GetActorRotation().Roll));
+		SetActorRotation(FRotator(CharacterRotation.Pitch, Direction.Yaw, CharacterRotation.Roll));
+		GetController()->SetControlRotation(FRotator(CharacterRotation.Pitch, Direction.Yaw, CharacterRotation.Roll));
 	}
 }
 
@@ -218,6 +221,7 @@ void AMainCharacter::EPress()
 
 void AMainCharacter::LockOn()
 {
+	if (!Weapon) return;
 	if (!CanLockedOnEnemy) return;
 	if (MainState == ECharacterArmedState::EAS_Unarmed)
 	{
@@ -246,7 +250,8 @@ void AMainCharacter::UnLockOn()
 
 void AMainCharacter::Attack()
 {
-	if (CombatState == ECharacterCombatState::EAS_Attacking && !CanNextCombo) return;
+	if (CombatState == ECharacterCombatState::ECS_Rolling) return;
+	if (CombatState==ECharacterCombatState::ECS_Attacking && !CanNextCombo) return;
 	if (FMath::IsWithinInclusive<int32>(CurrentCombo, 0, MaxCombo - 1))
 	{
 		CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
@@ -257,13 +262,14 @@ void AMainCharacter::Attack()
 
 void AMainCharacter::PlayAttackMontage(FName SectionName)
 {
+	UE_LOG(LogTemp, Warning, TEXT("AttackMontage"));
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && AttackMontage)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Animnotify_PlayAttackMontage Func %s"), *SectionName.ToString());
 		AnimInstance->Montage_Play(AttackMontage);
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
-		CombatState = ECharacterCombatState::EAS_Attacking;
+		CombatState = ECharacterCombatState::ECS_Attacking;
 	}
 }
 
@@ -281,8 +287,8 @@ void AMainCharacter::AttackEndComboState()
 
 void AMainCharacter::Roll()
 {
-	if (CombatState == ECharacterCombatState::EAS_Rolling) return;
-	if (CombatState == ECharacterCombatState::EAS_Attacking) return;
+	if (CombatState == ECharacterCombatState::ECS_Rolling) return;
+	if (CombatState == ECharacterCombatState::ECS_Attacking) return;
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && RollMontage)
 	{
@@ -297,7 +303,7 @@ void AMainCharacter::Roll()
 				AnimInstance->Montage_JumpToSection(Way, RollMontage);
 			}
 		}
-		CombatState = ECharacterCombatState::EAS_Rolling;
+		CombatState = ECharacterCombatState::ECS_Rolling;
 	}
 
 }

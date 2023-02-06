@@ -13,9 +13,9 @@ UENUM(BlueprintType)
 enum class ECharacterCombatState : uint8
 {
 	ECS_Default UMETA(DisplayName = "Default"),
-	EAS_Jumping UMETA(DisplayName = "Jumping"),
-	EAS_Attacking UMETA(DisplayName = "Attacking"),
-	EAS_Rolling UMETA(DisplayName = "Rolling")
+	ECS_Jumping UMETA(DisplayName = "Jumping"),
+	ECS_Attacking UMETA(DisplayName = "Attacking"),
+	ECS_Rolling UMETA(DisplayName = "Rolling")
 };
 
 struct FCharacterRoll

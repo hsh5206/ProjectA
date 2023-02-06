@@ -22,6 +22,7 @@ void UMainAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		GroundSpeed = UKismetMathLibrary::VSizeXY(MainMovement->Velocity);
 		bIsInAir = MainMovement->IsFalling();
 		CharacterState = MainCharacter->MainState;
+		CombatState = MainCharacter->CombatState;
 		Direction = CalculateDirection(MainCharacter->GetVelocity(), MainCharacter->GetActorRotation());
 	}
 }

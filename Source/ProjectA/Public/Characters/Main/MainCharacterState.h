@@ -17,3 +17,13 @@ enum class ECharacterCombatState : uint8
 	EAS_Attacking UMETA(DisplayName = "Attacking"),
 	EAS_Rolling UMETA(DisplayName = "Rolling")
 };
+
+struct FCharacterRoll
+
+{
+public:
+	bool bFront = true;
+	bool bBack = false;
+	bool bRight = false;
+	bool bLeft = false;
+};

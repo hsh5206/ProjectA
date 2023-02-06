@@ -27,7 +27,7 @@ AMainCharacter::AMainCharacter()
 	bUseControllerRotationRoll = false;
 	SpringArm->bUsePawnControlRotation = true;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 1500.f, 0.f);
 
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->JumpZVelocity = 600.f;
@@ -53,7 +53,7 @@ void AMainCharacter::Tick(float DeltaTime)
 	if (MainState == ECharacterArmedState::EAS_LockOn)
 	{
 		const FRotator Direction = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockedOnEnemy->GetActorLocation());
-		SetActorRotation(FRotator(GetActorRotation().Pitch, Direction.Yaw, GetActorRotation().Roll));
+		SetActorRotation(FRotator(Direction.Pitch, Direction.Yaw, GetActorRotation().Roll));
 		GetController()->SetControlRotation(FRotator(GetActorRotation().Pitch, Direction.Yaw, GetActorRotation().Roll));
 	}
 }
@@ -74,7 +74,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction(FName("EPress"), EInputEvent::IE_Pressed, this, &AMainCharacter::EPress);
 	PlayerInputComponent->BindAction(FName("LockOn"), EInputEvent::IE_Pressed, this, &AMainCharacter::LockOn);
 	PlayerInputComponent->BindAction(FName("Attack"), EInputEvent::IE_Pressed, this, &AMainCharacter::Attack);
-
+	PlayerInputComponent->BindAction(FName("Roll"), EInputEvent::IE_Pressed, this, &AMainCharacter::Roll);
 }
 
 void AMainCharacter::MoveForward(float value)
@@ -86,6 +86,23 @@ void AMainCharacter::MoveForward(float value)
 		FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Forward, value);
 	}
+
+	/** Roll Direction */
+	if (value > 0.f)
+	{
+		CharacterRollState.bFront = true;
+		CharacterRollState.bBack = false;
+	}
+	else if (value < 0.f)
+	{
+		CharacterRollState.bFront = false;
+		CharacterRollState.bBack = true;
+	}
+	else
+	{
+		CharacterRollState.bFront = false;
+		CharacterRollState.bBack = false;
+	}
 }
 
 void AMainCharacter::MoveRight(float value)
@@ -96,6 +113,23 @@ void AMainCharacter::MoveRight(float value)
 		const FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
 		FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Right, value);
+	}
+
+	/** Roll Direction */
+	if (value > 0.f)
+	{
+		CharacterRollState.bRight = true;
+		CharacterRollState.bLeft = false;
+	}
+	else if (value < 0.f)
+	{
+		CharacterRollState.bRight = false;
+		CharacterRollState.bLeft = true;
+	}
+	else
+	{
+		CharacterRollState.bRight = false;
+		CharacterRollState.bLeft = false;
 	}
 }
 
@@ -200,12 +234,14 @@ void AMainCharacter::LockOn()
 		MainState = ECharacterArmedState::EAS_LockOn;
 	}
 	LockedOnEnemy = CanLockedOnEnemy;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
 void AMainCharacter::UnLockOn()
 {
 	MainState = ECharacterArmedState::EAS_Armed;
 	LockedOnEnemy = nullptr;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 void AMainCharacter::Attack()
@@ -231,6 +267,91 @@ void AMainCharacter::PlayAttackMontage(FName SectionName)
 	}
 }
 
+void AMainCharacter::AttackStartComboState()
+{
+	CanNextCombo = true;
+}
+
+void AMainCharacter::AttackEndComboState()
+{
+	CombatState = ECharacterCombatState::ECS_Default;
+	CanNextCombo = false;
+	CurrentCombo = 0;
+}
+
+void AMainCharacter::Roll()
+{
+	if (CombatState == ECharacterCombatState::EAS_Rolling) return;
+	if (CombatState == ECharacterCombatState::EAS_Attacking) return;
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && RollMontage)
+	{
+		AnimInstance->Montage_Play(RollMontage);
+		if (MainState == ECharacterArmedState::EAS_LockOn)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%d %d %d %d"), CharacterRollState.bFront, CharacterRollState.bBack, CharacterRollState.bRight, CharacterRollState.bLeft);
+			FName Way = GetRollWay();
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *Way.ToString());
+			if (Way.IsValid())
+			{
+				AnimInstance->Montage_JumpToSection(Way, RollMontage);
+			}
+		}
+		CombatState = ECharacterCombatState::EAS_Rolling;
+	}
+
+}
+
+FName AMainCharacter::GetRollWay()
+{
+	FName Way;
+	if (CharacterRollState.bFront)
+	{
+		Way = FName("F");
+		if (CharacterRollState.bRight)
+		{
+			Way = FName("FR");
+		}
+		else if(CharacterRollState.bLeft)
+		{
+			Way = FName("FL");
+		}
+	}
+	else if (CharacterRollState.bBack)
+	{
+		Way = FName("B");
+		if (CharacterRollState.bRight)
+		{
+			Way = FName("BR");
+		}
+		else if (CharacterRollState.bLeft)
+		{
+			Way = FName("BL");
+		}
+	}
+	else
+	{
+		if (CharacterRollState.bRight)
+		{
+			Way = FName("R");
+		}
+		else if (CharacterRollState.bLeft)
+		{
+			Way = FName("L");
+		}
+		else
+		{
+			Way = FName("F");
+		}
+	}
+	return Way;
+}
+
+void AMainCharacter::RollEnd()
+{
+	CombatState = ECharacterCombatState::ECS_Default;
+}
+
 void AMainCharacter::OnLockOnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	APawn* TempCharacter = Cast<APawn>(OtherActor);
@@ -250,14 +371,3 @@ void AMainCharacter::OnLockOnOverlapEnd(UPrimitiveComponent* OverlappedComponent
 	if (MainState == ECharacterArmedState::EAS_LockOn) UnLockOn();
 }
 
-void AMainCharacter::AttackStartComboState()
-{
-	CanNextCombo = true;
-}
-
-void AMainCharacter::AttackEndComboState()
-{
-	CombatState = ECharacterCombatState::ECS_Default;
-	CanNextCombo = false;
-	CurrentCombo = 0;
-}

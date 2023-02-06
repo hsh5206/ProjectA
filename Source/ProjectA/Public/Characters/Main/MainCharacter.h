@@ -27,6 +27,7 @@ public:
 	ECharacterArmedState MainState = ECharacterArmedState::EAS_Unarmed;
 	UPROPERTY(VisibleAnywhere)
 	ECharacterCombatState CombatState = ECharacterCombatState::ECS_Default;
+	FCharacterRoll CharacterRollState;
 
 	/** Montage */
 	UPROPERTY(EditAnywhere)
@@ -34,6 +35,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* AttackMontage;
 	void PlayAttackMontage(FName SectionName);
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* RollMontage;
 
 	/** Callbacks by AnimNotify */
 	UFUNCTION(BlueprintCallable)
@@ -42,6 +45,8 @@ public:
 	void AttackStartComboState();
 	UFUNCTION(BlueprintCallable)
 	void AttackEndComboState();
+	UFUNCTION(BlueprintCallable)
+	void RollEnd();
 
 	/** Sensing */
 	UPROPERTY(EditAnywhere, Category = "Sensing")
@@ -65,8 +70,11 @@ protected:
 	void ArmDisarm();
 	void EPress();
 	void LockOn();
-	void UnLockOn();
 	void Attack();
+	void Roll();
+
+	void UnLockOn();
+	FName GetRollWay();
 
 	/** LockOn Sphere */
 	UFUNCTION()
@@ -93,6 +101,7 @@ private:
 	/** temp */
 	UPROPERTY(VisibleAnywhere)
 	class APawn* CanLockedOnEnemy;
+
 public:
 	FORCEINLINE void SetOverlappedItem(AItem* item) { OverlappedItem = item; }
 };

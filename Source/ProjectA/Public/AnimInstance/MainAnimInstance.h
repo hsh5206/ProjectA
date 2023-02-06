@@ -32,4 +32,6 @@ public:
 	bool bIsInAir;
 	UPROPERTY(BlueprintReadOnly, Category = "Character State")
 	ECharacterArmedState CharacterState;
+	UPROPERTY(BlueprintReadWrite, Category = "Character State")
+	ECharacterCombatState CombatState;
 };

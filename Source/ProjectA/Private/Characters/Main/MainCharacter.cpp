@@ -10,6 +10,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "Characters/Main/MainPlayerController.h"
 
 AMainCharacter::AMainCharacter()
 {
@@ -38,6 +39,13 @@ AMainCharacter::AMainCharacter()
 	LockOnSphere->SetupAttachment(GetRootComponent());
 
 	AttackEndComboState();
+
+	MaxHealth = 100;
+	Health = 100;
+	MaxStamina = 100;
+	Stamina = 100;
+
+	MainPlayerController = Cast<AMainPlayerController>(GetController());
 }
 
 void AMainCharacter::BeginPlay()
@@ -306,6 +314,11 @@ void AMainCharacter::Roll()
 		CombatState = ECharacterCombatState::ECS_Rolling;
 	}
 
+	Stamina -= 10.f;
+	if (MainPlayerController)
+	{
+		MainPlayerController->SetStaminaPercent(MaxStamina, Stamina);
+	}
 }
 
 FName AMainCharacter::GetRollWay()

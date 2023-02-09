@@ -16,4 +16,8 @@ class PROJECTA_API AEnemy : public ABaseCharacter
 	
 public:
 	AEnemy();
+	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+	UPROPERTY(VisibleAnywhere)
+	class UHealthBarComponent* HealthBarWidget;
 };

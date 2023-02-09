@@ -2,6 +2,8 @@
 
 
 #include "Characters/BaseCharacter.h"
+#include "Item/Weapon/Weapon.h"
+#include "Components/BoxComponent.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -21,3 +23,16 @@ void ABaseCharacter::Tick(float DeltaTime)
 
 }
 
+void ABaseCharacter::EnableWeaponCollision(ECollisionEnabled::Type CollisionEnabled)
+{
+	if (Weapon)
+	{
+		Weapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
+		Weapon->IgnoreActors.Empty();
+	}
+}
+
+float ABaseCharacter::GetHealthPercentage()
+{
+	return Health / MaxHealth;
+}

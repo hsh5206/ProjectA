@@ -215,7 +215,7 @@ void AMainCharacter::EPress()
 	{
 		Weapon = TempWeapon;
 		OverlappedItem = nullptr;
-		Weapon->Equip(GetMesh(), FName("SwordHolderSocket"));
+		Weapon->Equip(GetMesh(), FName("SwordHolderSocket"), this);
 	}
 }
 
@@ -262,11 +262,11 @@ void AMainCharacter::Attack()
 
 void AMainCharacter::PlayAttackMontage(FName SectionName)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AttackMontage"));
+	//UE_LOG(LogTemp, Warning, TEXT("AttackMontage"));
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && AttackMontage)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Animnotify_PlayAttackMontage Func %s"), *SectionName.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Animnotify_PlayAttackMontage Func %s"), *SectionName.ToString());
 		AnimInstance->Montage_Play(AttackMontage);
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 		CombatState = ECharacterCombatState::ECS_Attacking;
@@ -295,9 +295,9 @@ void AMainCharacter::Roll()
 		AnimInstance->Montage_Play(RollMontage);
 		if (MainState == ECharacterArmedState::EAS_LockOn)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%d %d %d %d"), CharacterRollState.bFront, CharacterRollState.bBack, CharacterRollState.bRight, CharacterRollState.bLeft);
+			//UE_LOG(LogTemp, Warning, TEXT("%d %d %d %d"), CharacterRollState.bFront, CharacterRollState.bBack, CharacterRollState.bRight, CharacterRollState.bLeft);
 			FName Way = GetRollWay();
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *Way.ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("%s"), *Way.ToString());
 			if (Way.IsValid())
 			{
 				AnimInstance->Montage_JumpToSection(Way, RollMontage);

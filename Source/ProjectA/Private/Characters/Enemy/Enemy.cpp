@@ -3,6 +3,8 @@
 
 #include "Characters/Enemy/Enemy.h"
 #include "HUD/HealthBarComponent.h"
+#include "Animation/AnimMontage.h"
+#include "Components/CapsuleComponent.h"
 
 AEnemy::AEnemy()
 {
@@ -16,7 +18,6 @@ AEnemy::AEnemy()
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
 	DrawDebugSphere(GetWorld(), ImpactPoint, 8.f, 12, FColor::Green, false, 5.f);
-	UE_LOG(LogTemp, Warning, TEXT("Enemy::GetHit"));
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -27,5 +28,24 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	{
 		HealthBarWidget->SetHealthPercent(GetHealthPercentage());
 	}
+	if (Health == 0.f)
+	{
+		EnemyState = EEnemyState::EES_Dead;
+		Dead();
+	}
 	return DamageAmount;
+}
+
+void AEnemy::Dead()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Enemy::Dead"));
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeadMontage)
+	{
+		AnimInstance->Montage_Play(DeadMontage);
+	}
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HealthBarWidget->SetVisibility(false);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetLifeSpan(5.f);
 }

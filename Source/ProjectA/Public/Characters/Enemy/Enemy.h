@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Characters/BaseCharacter.h"
+#include "EnemyState.h"
 #include "Enemy.generated.h"
 
 /**
@@ -18,6 +19,15 @@ public:
 	AEnemy();
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+	void Dead();
 	UPROPERTY(VisibleAnywhere)
 	class UHealthBarComponent* HealthBarWidget;
+
+	/** Montage */
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* DeadMontage;
+
+	/** State */
+	UPROPERTY(BlueprintReadOnly)
+	EEnemyState EnemyState = EEnemyState::EES_Default;
 };

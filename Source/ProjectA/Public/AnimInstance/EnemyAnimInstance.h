@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BaseAnimInstance.h"
+#include "Characters/Enemy/EnemyState.h"
 #include "EnemyAnimInstance.generated.h"
 
 /**
@@ -17,4 +18,6 @@ class PROJECTA_API UEnemyAnimInstance : public UBaseAnimInstance
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+	UPROPERTY(BlueprintReadOnly)
+	EEnemyState EnemyState;
 };

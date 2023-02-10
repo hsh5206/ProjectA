@@ -38,11 +38,9 @@ void AMainPlayerController::SetHealthPercent(float Max, float Cur)
 
 void AMainPlayerController::BeginPlay()
 {
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
 	Super::BeginPlay();
 	if (MainWidgetClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("MainWidgetClass"));
 
 		MainWidget = CreateWidget<UMainWidget>(this, MainWidgetClass);
 		MainWidget->AddToViewport();

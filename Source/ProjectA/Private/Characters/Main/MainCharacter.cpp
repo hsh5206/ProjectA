@@ -45,12 +45,13 @@ AMainCharacter::AMainCharacter()
 	MaxStamina = 100;
 	Stamina = 100;
 
-	MainPlayerController = Cast<AMainPlayerController>(GetController());
 }
 
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	MainPlayerController = Cast<AMainPlayerController>(GetController());
 
 	LockOnSphere->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacter::OnLockOnOverlap);
 	LockOnSphere->OnComponentEndOverlap.AddDynamic(this, &AMainCharacter::OnLockOnOverlapEnd);

@@ -61,7 +61,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
 
-	AMainPlayerController* MainPlayerController;
+	class AMainPlayerController* MainPlayerController;
 
 	/** Callbacks by Input */
 	void MoveForward(float value);

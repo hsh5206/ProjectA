@@ -5,6 +5,7 @@
 #include "HUD/HealthBarComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Components/CapsuleComponent.h"
+#include "Characters/Enemy/EnemyAIController.h"
 
 AEnemy::AEnemy()
 {
@@ -13,6 +14,9 @@ AEnemy::AEnemy()
 
 	HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBar"));
 	HealthBarWidget->SetupAttachment(GetRootComponent());
+
+	AIControllerClass = AEnemyAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)

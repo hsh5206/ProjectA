@@ -26,6 +26,19 @@ public:
 	/** Montage */
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* DeadMontage;
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* AttackMontage;
+
+	/** Attack */
+	void Attack();
+	FTimerHandle AttackBackHandle;
+	FTimerHandle AttackFrontHandle;
+	float AttackBackCoolTime = 4.f;
+	float AttackFrontCoolTime = 6.f;
+	void FrontTimerEnd();
+	void BackTimerEnd();
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
 
 	/** State */
 	UPROPERTY(BlueprintReadOnly)

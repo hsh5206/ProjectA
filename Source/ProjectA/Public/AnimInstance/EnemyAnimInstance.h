@@ -20,4 +20,6 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	UPROPERTY(BlueprintReadOnly)
 	EEnemyState EnemyState;
+	UPROPERTY(BlueprintReadOnly)
+	class AEnemy* Enemy;
 };

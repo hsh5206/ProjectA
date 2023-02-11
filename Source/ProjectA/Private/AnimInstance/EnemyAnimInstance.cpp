@@ -15,7 +15,7 @@ void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (Character)
 	{
-		AEnemy* Enemy = Cast<AEnemy>(Character);
+		Enemy = Cast<AEnemy>(Character);
 		EnemyState = Enemy->EnemyState;
 	}
 }

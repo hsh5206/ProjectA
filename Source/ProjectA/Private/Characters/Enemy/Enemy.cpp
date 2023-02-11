@@ -19,16 +19,16 @@ AEnemy::AEnemy()
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	static ConstructorHelpers::FClassFinder<AWeapon> WeaponAsset(TEXT("/Script/ProjectA.Weapon_C"));
-	static ConstructorHelpers::FObjectFinder<UStaticMeshComponent> MeshAsset(TEXT("/Game/Assets/Sword_Animations/Demo/Mannequin/Character/Mesh/Sword.Sword"));
+}
 
-	if (WeaponAsset.Succeeded())
+void AEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+	Weapon = GetWorld()->SpawnActor<AWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
+	if (Weapon)
 	{
-		Weapon = Cast<AWeapon>(WeaponAsset.Class);
-		if (MeshAsset.Succeeded())
-		{
-			Weapon->Mesh = MeshAsset.Object;
-		}
+		Weapon->Equip(GetMesh(), FName("RightHandSocket"), this);
+		Weapon->Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 

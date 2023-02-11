@@ -43,4 +43,7 @@ public:
 	/** State */
 	UPROPERTY(BlueprintReadOnly)
 	EEnemyState EnemyState = EEnemyState::EES_Default;
+
+protected:
+	virtual void BeginPlay() override;
 };

@@ -21,6 +21,12 @@ AWeapon::AWeapon()
 	TraceStart->SetupAttachment(GetRootComponent());
 	TraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("TraceEnd"));
 	TraceEnd->SetupAttachment(GetRootComponent());
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Game/Assets/Sword_Animations/Demo/Mannequin/Character/Mesh/Sword.Sword"));
+	if (MeshAsset.Succeeded())
+	{
+		Mesh->SetStaticMesh(MeshAsset.Object);
+	}
 }
 
 void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName)
@@ -31,6 +37,7 @@ void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocke
 
 void AWeapon::Equip(USceneComponent* InParent, const FName& InSocketName, APawn* NewInstigator)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Equip Weapon"));
 	SetInstigator(NewInstigator);
 	AttachMeshToSocket(InParent, InSocketName);
 	Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);

@@ -13,20 +13,25 @@ AWeapon::AWeapon()
 {
 	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
 	WeaponBox->SetupAttachment(GetRootComponent());
-	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 	TraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("TraceStart"));
 	TraceStart->SetupAttachment(GetRootComponent());
 	TraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("TraceEnd"));
 	TraceEnd->SetupAttachment(GetRootComponent());
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Game/Assets/Sword_Animations/Demo/Mannequin/Character/Mesh/Sword.Sword"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Game/Assets/Weapon_Pack/Mesh/Weapons/Weapons_Kit/SM_GreatAxe.SM_GreatAxe"));
 	if (MeshAsset.Succeeded())
 	{
 		Mesh->SetStaticMesh(MeshAsset.Object);
 	}
+}
+
+void AWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 }
 
 void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName)
@@ -37,7 +42,6 @@ void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocke
 
 void AWeapon::Equip(USceneComponent* InParent, const FName& InSocketName, APawn* NewInstigator)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Equip Weapon"));
 	SetInstigator(NewInstigator);
 	AttachMeshToSocket(InParent, InSocketName);
 	Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);

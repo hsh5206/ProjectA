@@ -7,6 +7,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Characters/Enemy/EnemyAIController.h"
 #include "Item/Weapon/Weapon.h"
+#include "Characters/Enemy/EnemyAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AEnemy::AEnemy()
 {
@@ -24,22 +27,38 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	Weapon = GetWorld()->SpawnActor<AWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
+	
+	/*Weapon = GetWorld()->SpawnActor<AWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
 	if (Weapon)
 	{
 		Weapon->Equip(GetMesh(), FName("RightHandSocket"), this);
 		Weapon->Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}*/
+
+	if (WeaponToSpawn)
+	{
+		Weapon = Cast<AWeapon>(GetWorld()->SpawnActor(WeaponToSpawn));
+		Weapon->Equip(GetMesh(), FName("RightHandSocket"), this);
+		Weapon->Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	DrawDebugSphere(GetWorld(), ImpactPoint, 8.f, 12, FColor::Green, false, 5.f);
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
+	}
+	if (HitParticle)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, ImpactPoint);
+	}
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%f"), DamageAmount);
 	Health = FMath::Clamp(Health - DamageAmount, 0.f, MaxHealth);
 	if (HealthBarWidget)
 	{
@@ -47,7 +66,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	}
 	if (Health == 0.f)
 	{
-		EnemyState = EEnemyState::EES_Dead;
+		SetEnemyState(EEnemyState::EES_Dead);
 		Dead();
 	}
 	return DamageAmount;
@@ -63,6 +82,9 @@ void AEnemy::Dead()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HealthBarWidget->SetVisibility(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	auto controllerRef = GetController();
+	GetController()->UnPossess();
+	controllerRef->Destroy();
 	SetLifeSpan(5.f);
 }
 
@@ -74,32 +96,24 @@ void AEnemy::Attack()
 	if (AnimInstance && AttackMontage)
 	{
 		AnimInstance->Montage_Play(AttackMontage);
-		if (!AttackFrontHandle.IsValid())
-		{
-			AnimInstance->Montage_JumpToSection(FName("AttackFront"), AttackMontage);
-			GetWorldTimerManager().SetTimer(AttackFrontHandle, this, &AEnemy::FrontTimerEnd, AttackFrontCoolTime);
-		}
-		else if (!AttackBackHandle.IsValid())
-		{
-			AnimInstance->Montage_JumpToSection(FName("AttackBack"), AttackMontage);
-			GetWorldTimerManager().SetTimer(AttackBackHandle, this, &AEnemy::BackTimerEnd, AttackBackCoolTime);
-
-		}
-		EnemyState = EEnemyState::EES_Attacking;
+		SetEnemyState(EEnemyState::EES_Attacking);
+		int32 Section = FMath::RandRange(1, 3);
+		
+		AnimInstance->Montage_JumpToSection(FName(*FString::Printf(TEXT("Attack%d"), Section)), AttackMontage);
 	}
-}
-
-void AEnemy::FrontTimerEnd()
-{
-	GetWorldTimerManager().ClearTimer(AttackFrontHandle);
-}
-
-void AEnemy::BackTimerEnd()
-{
-	GetWorldTimerManager().ClearTimer(AttackBackHandle);
 }
 
 void AEnemy::AttackEnd()
 {
-	EnemyState = EEnemyState::EES_Default;
+	SetEnemyState(EEnemyState::EES_Default);
+}
+
+void AEnemy::SetEnemyState(EEnemyState state)
+{
+	EnemyState = state;
+	/*AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+	if (AIController)
+	{
+		AIController->GetBlackboardComponent()->SetValueAsEnum(AEnemyAIController::Key_EnemyState, (uint8)state);
+	}*/
 }

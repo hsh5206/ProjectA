@@ -11,6 +11,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 #include "Characters/Main/MainPlayerController.h"
+#include "HUD/MainWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 AMainCharacter::AMainCharacter()
 {
@@ -315,7 +317,7 @@ void AMainCharacter::Roll()
 		CombatState = ECharacterCombatState::ECS_Rolling;
 	}
 
-	Stamina -= 10.f;
+	Stamina = FMath::Clamp(Stamina - 10, 0.f, MaxStamina);
 	if (MainPlayerController)
 	{
 		MainPlayerController->SetStaminaPercent(MaxStamina, Stamina);
@@ -391,3 +393,29 @@ void AMainCharacter::OnLockOnOverlapEnd(UPrimitiveComponent* OverlappedComponent
 	if (MainState == ECharacterArmedState::EAS_LockOn) UnLockOn();
 }
 
+float AMainCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - DamageAmount, 0.f, MaxHealth);
+
+	MainPlayerController->SetHealthPercent(MaxHealth, Health);
+	
+	if (Health == 0.f)
+	{
+		CombatState = ECharacterCombatState::ECS_Dead;
+		// Dead
+	}
+
+	return DamageAmount;
+}
+
+void AMainCharacter::GetHit_Implementation(const FVector& ImpactPoint)
+{
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
+	}
+	if (HitParticle)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, ImpactPoint);
+	}
+}

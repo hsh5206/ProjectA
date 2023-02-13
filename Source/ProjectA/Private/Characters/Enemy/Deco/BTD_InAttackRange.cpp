@@ -20,6 +20,6 @@ bool UBTD_InAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent& Owne
 	AMainCharacter* Target = Cast<AMainCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(AEnemyAIController::Key_Target));
 	if (nullptr == Target) return false;
 
-	bool bResult = (Target->GetDistanceTo(ControllingPawn) <= 500.0f);
+	bool bResult = (Target->GetDistanceTo(ControllingPawn) <= 100.0f);
 	return bResult;
 }

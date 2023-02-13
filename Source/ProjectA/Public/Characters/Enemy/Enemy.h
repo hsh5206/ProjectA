@@ -31,18 +31,16 @@ public:
 
 	/** Attack */
 	void Attack();
-	FTimerHandle AttackBackHandle;
-	FTimerHandle AttackFrontHandle;
-	float AttackBackCoolTime = 4.f;
-	float AttackFrontCoolTime = 6.f;
-	void FrontTimerEnd();
-	void BackTimerEnd();
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
 
 	/** State */
 	UPROPERTY(BlueprintReadOnly)
 	EEnemyState EnemyState = EEnemyState::EES_Default;
+	void SetEnemyState(EEnemyState state);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<AWeapon> WeaponToSpawn;
 
 protected:
 	virtual void BeginPlay() override;

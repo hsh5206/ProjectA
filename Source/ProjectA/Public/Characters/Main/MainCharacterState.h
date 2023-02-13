@@ -15,7 +15,8 @@ enum class ECharacterCombatState : uint8
 	ECS_Default UMETA(DisplayName = "Default"),
 	ECS_Jumping UMETA(DisplayName = "Jumping"),
 	ECS_Attacking UMETA(DisplayName = "Attacking"),
-	ECS_Rolling UMETA(DisplayName = "Rolling")
+	ECS_Rolling UMETA(DisplayName = "Rolling"),
+	ECS_Dead UMETA(DisplayName = "Dead")
 };
 
 struct FCharacterRoll

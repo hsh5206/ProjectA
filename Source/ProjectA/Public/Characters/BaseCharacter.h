@@ -16,6 +16,13 @@ public:
 	ABaseCharacter();
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere)
+	class USoundBase* HitSound;
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* HitParticle;
+	UPROPERTY(EidtAnywhere)
+	class UAnimMontage* HitReactMontage;
+
 protected:
 	virtual void BeginPlay() override;
 
